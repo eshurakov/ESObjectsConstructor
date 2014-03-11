@@ -12,6 +12,6 @@
 @interface ESPropertyInspector : NSObject
 
 + (NSArray *)propertiesForClass:(Class)class;
-+ (ESObjectProperty *)propertyWithName:(NSString *)properyName inClass:(Class)class;
++ (ESObjectProperty *)propertyWithName:(NSString *)properyName fromClass:(Class)class;
 
 @end

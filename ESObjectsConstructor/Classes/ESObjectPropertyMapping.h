@@ -11,11 +11,14 @@
 
 @interface ESObjectPropertyMapping : NSObject
 
-@property(nonatomic, strong) NSString *sourceKeyPath;
+@property(nonatomic, strong, readonly) NSString *sourceKeyPath;
 
-@property(nonatomic, strong) NSString *destinationKeyPath;
+@property(nonatomic, strong, readonly) NSString *destinationKeyPath;
 @property(nonatomic, strong) ESObjectsConstructorConfig *destinationConfig;
 
-@property(nonatomic, assign, getter = isOptional) BOOL optional;
+@property(nonatomic, assign, readonly, getter = isOptional) BOOL optional;
+
+- (instancetype)initWithKeyPath:(NSString *)keyPath;
+- (instancetype)initWithSourceKeyPath:(NSString *)sourceKeyPath destinationKeyPath:(NSString *)destinationKeyPath;
 
 @end

@@ -25,13 +25,13 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
     switch (config.type) {
         case ESObjectsConstructorConfigObject:
             result = [self constructObjectFromDictionary:data
-                                              withConfig:config.objectMapping
+                                             withMapping:config.objectMapping
                                                    error:&localError];
             break;
             
         case ESObjectsConstructorConfigCollection:
             result = [self constructObjectsFromArray:data
-                                          withConfig:config.objectMapping
+                                         withMapping:config.objectMapping
                                                error:&localError];
             break;
             
@@ -41,7 +41,7 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
                                          userInfo:nil];
             break;
     }
-
+    
     if (error) {
         *error = localError;
     }
@@ -52,9 +52,9 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
 #pragma mark -
 
 - (NSArray *)constructObjectsFromArray:(NSArray *)objects
-                            withConfig:(ESObjectMapping *)config
+                           withMapping:(ESObjectMapping *)objectMapping
                                  error:(NSError **)error {
-	NSParameterAssert(config);
+    NSParameterAssert(objectMapping);
     if (![objects isKindOfClass:[NSArray class]]) {
         *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
                                      code:ESObjectsConstructorInvalidData
@@ -62,16 +62,16 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
         return nil;
     }
     
-	NSMutableArray *results = [[NSMutableArray alloc] init];
+    NSMutableArray *results = [[NSMutableArray alloc] init];
     NSMutableArray *errors = [[NSMutableArray alloc] init];
     
-	for (NSDictionary *objectData in objects) {
+    for (NSDictionary *objectData in objects) {
         NSError *objectError = nil;
         
-		id object = [self constructObjectFromDictionary:objectData
-                                             withConfig:config
+        id object = [self constructObjectFromDictionary:objectData
+                                            withMapping:objectMapping
                                                   error:&objectError];
-
+        
         if (objectError) {
             [errors addObject:objectError];
         }
@@ -79,21 +79,21 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
         if (object) {
             [results addObject:object];
         }
-	}
-	
+    }
+    
     if ([errors count] > 0) {
         *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
                                      code:ESObjectsConstructorCorruptedObjects
                                  userInfo:nil];
     }
     
-	return results;
+    return results;
 }
 
 - (id)constructObjectFromDictionary:(NSDictionary *)objectDict
-                         withConfig:(ESObjectMapping *)config
+                        withMapping:(ESObjectMapping *)objectMapping
                               error:(NSError **)error {
-    NSParameterAssert(config);
+    NSParameterAssert(objectMapping);
     if (![objectDict isKindOfClass:[NSDictionary class]]) {
         *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
                                      code:ESObjectsConstructorInvalidData
@@ -101,7 +101,7 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
         return nil;
     }
     
-    id object = [[config.modelClass alloc] init];
+    id object = [[objectMapping.modelClass alloc] init];
     if (!object) {
         *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
                                      code:ESObjectsConstructorNilModel
@@ -109,8 +109,9 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
         return nil;
     }
     
-	for (ESObjectPropertyMapping *mapping in config.mappings) {
-        ESObjectProperty *property = [ESPropertyInspector propertyWithName:mapping.destinationKeyPath inClass:config.modelClass];
+    for (ESObjectPropertyMapping *propertyMapping in objectMapping.mappings) {
+        ESObjectProperty *property = [ESPropertyInspector propertyWithName:propertyMapping.destinationKeyPath
+                                                                 fromClass:objectMapping.modelClass];
         
         if (!property || property.type == ESObjectPropertyTypeUnknown) {
             *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
@@ -118,9 +119,13 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
                                      userInfo:nil];
             return nil;
         }
-		      
-		id value = [objectDict valueForKeyPath:mapping.sourceKeyPath];
+        
+        id value = [objectDict valueForKeyPath:propertyMapping.sourceKeyPath];
         if (!value) {
+            if (propertyMapping.optional) {
+                continue;
+            }
+            
             *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
                                          code:ESObjectsConstructorMissingValue
                                      userInfo:nil];
@@ -128,21 +133,23 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
         }
         
         NSError *relationshipError = nil;
-		if (mapping.destinationConfig) {
-            value = [self constructFromData:value withConfig:mapping.destinationConfig error:&relationshipError];
-		}
+        if (propertyMapping.destinationConfig) {
+            value = [self constructFromData:value
+                                 withConfig:propertyMapping.destinationConfig
+                                      error:&relationshipError];
+        }
         
-		value = [self convertValue:value forProperty:property error:error];
+        value = [self convertValue:value forProperty:property error:error];
         if (*error) {
             return nil;
         }
         
         *error = relationshipError;
         
-		[object setValue:value forKey:mapping.destinationKeyPath];
-	}
-	
-	return object;
+        [object setValue:value forKey:propertyMapping.destinationKeyPath];
+    }
+    
+    return object;
 }
 
 - (id)convertValue:(id)value forProperty:(ESObjectProperty *)property error:(NSError **)error {
@@ -157,25 +164,25 @@ NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDo
         class = [NSNumber class];
     }
     
-	if (!class || [value isKindOfClass:class]) {
-		return value;
-	}
+    if (!class || [value isKindOfClass:class]) {
+        return value;
+    }
     
-	if ([class isSubclassOfClass:[NSString class]]) {
-		if ([value respondsToSelector:@selector(stringValue)]) {
-			return [value stringValue];
-		}
-	} else if ([class isSubclassOfClass:[NSNumber class]]) {
+    if ([class isSubclassOfClass:[NSString class]]) {
+        if ([value respondsToSelector:@selector(stringValue)]) {
+            return [value stringValue];
+        }
+    } else if ([class isSubclassOfClass:[NSNumber class]]) {
         if ([value respondsToSelector:@selector(doubleValue)]) {
             return @([value doubleValue]);
         }
     }
-	
+    
     *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
                                  code:ESObjectsConstructorMissingValue
                              userInfo:nil];
     
-	return nil;
+    return nil;
 }
 
 @end

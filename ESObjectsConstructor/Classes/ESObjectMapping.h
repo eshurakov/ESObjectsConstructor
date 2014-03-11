@@ -25,6 +25,4 @@
 
 - (void)mapProperties:(NSArray *)properties;
 
-- (NSString *)keyPathForProperty:(NSString *)attributeName;
-
 @end

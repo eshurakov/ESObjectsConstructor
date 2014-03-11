@@ -22,7 +22,7 @@ static NSMutableDictionary *propertyInspectorChainCache = nil;
     propertyInspectorChainCache = [[NSMutableDictionary alloc] init];
 }
 
-+ (ESObjectProperty *)propertyWithName:(NSString *)properyName inClass:(Class)class {
++ (ESObjectProperty *)propertyWithName:(NSString *)properyName fromClass:(Class)class {
     NSArray *properties = [self propertiesForClass:class];
     for (ESObjectProperty *property in properties) {
         if ([property.name isEqualToString:properyName]) {
