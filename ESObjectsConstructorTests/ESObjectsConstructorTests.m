@@ -50,7 +50,7 @@
     [config mapProperties:[json allKeys]];
     
     NSError *error = nil;
-    TestProductModel *model = [_objectsConstructor constructFromData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
     assertThat(model, nilValue());
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorUnknownProperty));
@@ -63,7 +63,7 @@
     [config mapProperties:@[@"stringField", @"numberField", @"doubleField"]];
     
     NSError *error = nil;
-    TestProductModel *model = [_objectsConstructor constructFromData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
     assertThat(model, nilValue());
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorMissingValue));
@@ -73,7 +73,7 @@
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
     
     NSError *error = nil;
-    TestProductModel *model = [_objectsConstructor constructFromData:[NSSet set] withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    TestProductModel *model = [_objectsConstructor mapData:[NSSet set] withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
     assertThat(model, nilValue());
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
@@ -89,10 +89,10 @@
     [config mapProperties:@[@"stringField"]];
     
     NSError *error = nil;
-    NSArray *results = [_objectsConstructor constructFromData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigCollection objectMapping:config] error:&error];
+    NSArray *results = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigCollection objectMapping:config] error:&error];
     assertThat(error, notNilValue());
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
-    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorCorruptedObjects));
+    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorMissingValue));
     
     assertThatUnsignedInteger([results count], equalToUnsignedInteger(2));
     
@@ -109,7 +109,7 @@
     [config mapProperties:[json allKeys]];
     
     NSError *error = nil;
-    TestProductModel *model = [_objectsConstructor constructFromData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
     assertThat(error, nilValue());
     [self testFields:json inModel:model];
 }
@@ -125,7 +125,7 @@
     [config mapKeyPath:@"double_field" toProperty:@"doubleField"];
     
     NSError *error = nil;
-    TestProductModel *model = [_objectsConstructor constructFromData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
     assertThat(error, nilValue());
     [self testFields:@{@"stringField": @"test",
                        @"numberField" : @2.4535,
@@ -141,7 +141,7 @@
     [config mapProperties:[json allKeys]];
     
     NSError *error = nil;
-    TestProductModel *model = [_objectsConstructor constructFromData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
     assertThat(error, nilValue());
     
     NSDictionary *reference = @{@"numberField" : @2.4535,
@@ -162,7 +162,7 @@
     [config mapKeyPath:@"testModel" toProperty:@"testModel" config:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:foreignConfig]];
     
     NSError *error = nil;
-    TestProductModel *model = [_objectsConstructor constructFromData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
     assertThat(error, nilValue());
     
     NSDictionary *reference = @{@"numberField" : @2.4535,
@@ -179,7 +179,7 @@
     [config mapProperties:@[@"stringField", @"numberField?", @"doubleField?"]];
     
     NSError *error = nil;
-    TestProductModel *model = [_objectsConstructor constructFromData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
     
     assertThat(error, nilValue());
     [self testFields:@{@"stringField": @"test"} inModel:model];

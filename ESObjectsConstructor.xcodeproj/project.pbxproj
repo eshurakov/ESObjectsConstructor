@@ -23,6 +23,8 @@
 		A61B915118CCD9D900383D54 /* ESObjectsConstructor.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B914A18CCD9D900383D54 /* ESObjectsConstructor.m */; };
 		A61B915218CCD9D900383D54 /* ESObjectMapping.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B914C18CCD9D900383D54 /* ESObjectMapping.m */; };
 		A61B915318CCD9D900383D54 /* ESObjectPropertyMapping.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B914E18CCD9D900383D54 /* ESObjectPropertyMapping.m */; };
+		A6AB682318D101BF00283822 /* ESObjectsConstructionOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = A6AB682218D101BF00283822 /* ESObjectsConstructionOperation.m */; };
+		A6AB682418D101BF00283822 /* ESObjectsConstructionOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = A6AB682218D101BF00283822 /* ESObjectsConstructionOperation.m */; };
 		A6BF03E118CCFCE300C51559 /* ESObjectProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B914018CCD92B00383D54 /* ESObjectProperty.m */; };
 		A6BF03E218CCFCE600C51559 /* ESPropertyInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B914218CCD92B00383D54 /* ESPropertyInspector.m */; };
 		A6BF03E318CCFCE900C51559 /* ESObjectsConstructor.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B914A18CCD9D900383D54 /* ESObjectsConstructor.m */; };
@@ -68,6 +70,8 @@
 		A61B914C18CCD9D900383D54 /* ESObjectMapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESObjectMapping.m; sourceTree = "<group>"; };
 		A61B914D18CCD9D900383D54 /* ESObjectPropertyMapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESObjectPropertyMapping.h; sourceTree = "<group>"; };
 		A61B914E18CCD9D900383D54 /* ESObjectPropertyMapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESObjectPropertyMapping.m; sourceTree = "<group>"; };
+		A6AB682118D101BF00283822 /* ESObjectsConstructionOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESObjectsConstructionOperation.h; sourceTree = "<group>"; };
+		A6AB682218D101BF00283822 /* ESObjectsConstructionOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESObjectsConstructionOperation.m; sourceTree = "<group>"; };
 		A6FD24BC18CE6EE00030D2A9 /* ESObjectsConstructorConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESObjectsConstructorConfig.h; sourceTree = "<group>"; };
 		A6FD24BD18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESObjectsConstructorConfig.m; sourceTree = "<group>"; };
 		D3CF759FCC1344E8B4F4C13E /* libPods-ESObjectsConstructorTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ESObjectsConstructorTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -175,6 +179,8 @@
 				A61B913E18CCD92B00383D54 /* Inspection */,
 				A61B914918CCD9D900383D54 /* ESObjectsConstructor.h */,
 				A61B914A18CCD9D900383D54 /* ESObjectsConstructor.m */,
+				A6AB682118D101BF00283822 /* ESObjectsConstructionOperation.h */,
+				A6AB682218D101BF00283822 /* ESObjectsConstructionOperation.m */,
 				A6FD24BC18CE6EE00030D2A9 /* ESObjectsConstructorConfig.h */,
 				A6FD24BD18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m */,
 				A61B914B18CCD9D900383D54 /* ESObjectMapping.h */,
@@ -325,6 +331,7 @@
 				A60AD14F18CCCBA50070B3EA /* ESAppDelegate.m in Sources */,
 				A61B914318CCD92B00383D54 /* ESObjectProperty.m in Sources */,
 				A60AD14B18CCCBA50070B3EA /* main.m in Sources */,
+				A6AB682318D101BF00283822 /* ESObjectsConstructionOperation.m in Sources */,
 				A6FD24BE18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m in Sources */,
 				A61B915118CCD9D900383D54 /* ESObjectsConstructor.m in Sources */,
 				A61B915318CCD9D900383D54 /* ESObjectPropertyMapping.m in Sources */,
@@ -337,6 +344,7 @@
 			files = (
 				A6FD24BF18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m in Sources */,
 				A6BF03E218CCFCE600C51559 /* ESPropertyInspector.m in Sources */,
+				A6AB682418D101BF00283822 /* ESObjectsConstructionOperation.m in Sources */,
 				A6BF03E518CCFCF900C51559 /* ESObjectPropertyMapping.m in Sources */,
 				A6BF03E418CCFCF400C51559 /* ESObjectMapping.m in Sources */,
 				A6BF03E318CCFCE900C51559 /* ESObjectsConstructor.m in Sources */,

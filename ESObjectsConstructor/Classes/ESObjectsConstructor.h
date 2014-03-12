@@ -9,8 +9,8 @@
 
 extern NSString * const ESObjectsConstructorErrorDomain;
 typedef NS_ENUM(NSUInteger, ESObjectsConstructorErrorCode) {
-    ESObjectsConstructorInvalidData = 1,
-    ESObjectsConstructorCorruptedObjects,
+    ESObjectsConstructorMultipleIssues = 1,
+    ESObjectsConstructorInvalidData,
     ESObjectsConstructorNilModel,
     ESObjectsConstructorUnknownProperty,
     ESObjectsConstructorMissingValue
@@ -20,6 +20,6 @@ typedef NS_ENUM(NSUInteger, ESObjectsConstructorErrorCode) {
 
 @interface ESObjectsConstructor : NSObject
 
-- (id)constructFromData:(id)data withConfig:(ESObjectsConstructorConfig *)config error:(NSError **)error;
+- (id)mapData:(id)data withConfig:(ESObjectsConstructorConfig *)config error:(NSError **)error;
 
 @end
