@@ -20,6 +20,7 @@
 @interface TestProductModel : NSObject
 @property(nonatomic, strong) NSString *stringField;
 @property(nonatomic, strong) NSNumber *numberField;
+@property(nonatomic, strong) NSDecimalNumber *decimalField;
 @property(nonatomic, assign) double doubleField;
 @property(nonatomic, strong) TestProductModel *testModel;
 @end
@@ -135,7 +136,8 @@
 
 - (void)testStringToNumberConversion {
     NSDictionary *json = @{@"numberField" : @"2.4535",
-                           @"doubleField" : @"3.145142342"};
+                           @"doubleField" : @"3.145142342",
+                           @"decimalField" : @"129.5746204"};
     
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
     [config mapProperties:[json allKeys]];
@@ -145,7 +147,8 @@
     assertThat(error, nilValue());
     
     NSDictionary *reference = @{@"numberField" : @2.4535,
-                                @"doubleField" : @3.145142342};
+                                @"doubleField" : @3.145142342,
+                                @"decimalField": [NSDecimalNumber decimalNumberWithString:@"129.5746204"]};
     [self testFields:reference inModel:model];
 }
 

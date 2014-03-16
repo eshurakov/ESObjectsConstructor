@@ -172,13 +172,17 @@
         return value;
     }
     
-    if ([class isSubclassOfClass:[NSString class]]) {
+    if ([class isEqual:[NSString class]]) {
         if ([value respondsToSelector:@selector(stringValue)]) {
             return [value stringValue];
         }
-    } else if ([class isSubclassOfClass:[NSNumber class]]) {
+    } else if ([class isEqual:[NSNumber class]]) {
         if ([value respondsToSelector:@selector(doubleValue)]) {
             return @([value doubleValue]);
+        }
+    } else if ([class isEqual:[NSDecimalNumber class]]) {
+        if ([value isKindOfClass:[NSString class]]) {
+            return [NSDecimalNumber decimalNumberWithString:value];
         }
     }
     
