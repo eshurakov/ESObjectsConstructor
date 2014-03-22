@@ -91,7 +91,6 @@
     
     NSError *error = nil;
     NSArray *results = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigCollection objectMapping:config] error:&error];
-    assertThat(error, notNilValue());
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorMissingValue));
     
@@ -150,6 +149,48 @@
                                 @"doubleField" : @3.145142342,
                                 @"decimalField": [NSDecimalNumber decimalNumberWithString:@"129.5746204"]};
     [self testFields:reference inModel:model];
+}
+
+- (void)testInvalidStringToNumberConversion {
+    NSDictionary *json = @{@"numberField" : @"invalid number"};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:[json allKeys]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    assertThat(model, nilValue());
+    
+    assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
+    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
+}
+
+- (void)testInvalidStringToDoubleConversion {
+    NSDictionary *json = @{@"doubleField" : @"invalid number"};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:[json allKeys]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    assertThat(model, nilValue());
+    
+    assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
+    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
+}
+
+- (void)testInvalidStringToDecimalConversion {
+    NSDictionary *json = @{@"decimalField" : @"invalid number"};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:[json allKeys]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    assertThat(model, nilValue());
+    
+    assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
+    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
 }
 
 - (void)testForeignAttributes {

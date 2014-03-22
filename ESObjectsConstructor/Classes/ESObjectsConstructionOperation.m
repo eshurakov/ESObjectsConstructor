@@ -176,13 +176,22 @@
         if ([value respondsToSelector:@selector(stringValue)]) {
             return [value stringValue];
         }
-    } else if ([class isEqual:[NSNumber class]]) {
-        if ([value respondsToSelector:@selector(doubleValue)]) {
-            return @([value doubleValue]);
+    } else if ([class isEqual:[NSNumber class]] && [value isKindOfClass:[NSString class]]) {
+        static NSNumberFormatter *numberFormatter = nil;
+        if (numberFormatter == nil) {
+            numberFormatter = [[NSNumberFormatter alloc] init];
+            [numberFormatter setNumberStyle:NSNumberFormatterDecimalStyle];
+            [numberFormatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
         }
-    } else if ([class isEqual:[NSDecimalNumber class]]) {
-        if ([value isKindOfClass:[NSString class]]) {
-            return [NSDecimalNumber decimalNumberWithString:value];
+        
+        NSNumber *result = [numberFormatter numberFromString:value];
+        if (result) {
+            return result;
+        }
+    } else if ([class isEqual:[NSDecimalNumber class]] && [value isKindOfClass:[NSString class]]) {
+        NSDecimalNumber *result = [NSDecimalNumber decimalNumberWithString:value];
+        if (result && ![result isEqual:[NSDecimalNumber notANumber]]) {
+            return result;
         }
     }
     
