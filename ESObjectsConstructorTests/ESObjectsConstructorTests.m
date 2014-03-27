@@ -80,6 +80,15 @@
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
 }
 
+- (void)testFailNilData {
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:nil withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    assertThat(model, nilValue());
+    assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
+    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
+}
+
 - (void)testFailOneOfObjectsOfArray {
     NSArray *json = @[
                       @{@"stringField" : @"test1"},

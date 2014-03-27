@@ -29,7 +29,6 @@
 }
 
 - (instancetype)initWithData:(id)data config:(ESObjectsConstructorConfig *)config {
-    NSParameterAssert(data);
     NSParameterAssert(config);
     self = [super init];
     if (self) {
