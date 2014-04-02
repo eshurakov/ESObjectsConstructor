@@ -192,6 +192,11 @@
         if (result && ![result isEqual:[NSDecimalNumber notANumber]]) {
             return result;
         }
+    } else if ([class isEqual:[NSDate class]] && [value isKindOfClass:[NSNumber class]]) {
+        NSDate *result = [NSDate dateWithTimeIntervalSince1970:([value longLongValue] / 1000.0)];
+        if (result) {
+            return result;
+        }
     }
     
     if (error) {

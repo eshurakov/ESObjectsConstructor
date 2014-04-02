@@ -23,6 +23,7 @@
 @property(nonatomic, strong) NSDecimalNumber *decimalField;
 @property(nonatomic, assign) double doubleField;
 @property(nonatomic, strong) TestProductModel *testModel;
+@property(nonatomic, strong) NSDate *dateField;
 @end
 
 @implementation TestProductModel
@@ -200,6 +201,24 @@
     
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
+}
+
+- (void)testMillisecondsToDateConversion {
+    NSDate *date = [NSDate date];
+    long long milliseconds = [date timeIntervalSince1970] * 1000;
+    date = [NSDate dateWithTimeIntervalSince1970:milliseconds / 1000.0];
+    
+    NSDictionary *json = @{@"dateField" : @(milliseconds)};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:[json allKeys]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[[ESObjectsConstructorConfig alloc] initWithType:ESObjectsConstructorConfigObject objectMapping:config] error:&error];
+    assertThat(error, nilValue());
+    
+    NSDictionary *reference = @{@"dateField" : date};
+    [self testFields:reference inModel:model];
 }
 
 - (void)testForeignAttributes {
