@@ -14,15 +14,11 @@
 }
 
 - (instancetype)initWithKeyPath:(NSString *)keyPath {
-    return [self initWithSourceKeyPath:keyPath destinationKeyPath:nil];
-}
-
-- (instancetype)initWithSourceKeyPath:(NSString *)sourceKeyPath destinationKeyPath:(NSString *)destinationKeyPath {
-    NSParameterAssert(sourceKeyPath);
+    NSParameterAssert(keyPath);
     self = [super init];
     if (self) {
-        [self parseSourceKeyPath:sourceKeyPath];
-        _destinationKeyPath = destinationKeyPath ?: _sourceKeyPath;
+        [self parseSourceKeyPath:keyPath];
+        _destinationKeyPath = _sourceKeyPath;
     }
     return self;
 }

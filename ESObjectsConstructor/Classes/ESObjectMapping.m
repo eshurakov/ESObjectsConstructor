@@ -27,23 +27,39 @@
 }
 
 - (void)mapKeyPath:(NSString *)sourceKeyPath toProperty:(NSString *)destinationProperty {
-    [self mapKeyPath:sourceKeyPath toProperty:destinationProperty config:nil];
+    ESObjectPropertyMapping *mapping = [self mapKeyPath:sourceKeyPath];
+    mapping.destinationKeyPath = destinationProperty;
 }
 
 - (void)mapKeyPath:(NSString *)sourceKeyPath toProperty:(NSString *)destinationProperty config:(ESObjectsConstructorConfig *)config {
-    NSParameterAssert(sourceKeyPath);
-    
-    ESObjectPropertyMapping *mapping = [[ESObjectPropertyMapping alloc] initWithSourceKeyPath:sourceKeyPath
-                                                                           destinationKeyPath:destinationProperty];
+    ESObjectPropertyMapping *mapping = [self mapKeyPath:sourceKeyPath];
+    mapping.destinationKeyPath = destinationProperty;
     mapping.destinationConfig = config;
-    
-    [_mappings addObject:mapping];
 }
 
 - (void)mapProperties:(NSArray *)properties {
     for (NSString *keyPath in properties) {
-        [self mapKeyPath:keyPath toProperty:nil];
+        [self mapKeyPath:keyPath];
     }
+}
+
+- (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath {
+    NSParameterAssert(sourceKeyPath);
+    ESObjectPropertyMapping *mapping = [[ESObjectPropertyMapping alloc] initWithKeyPath:sourceKeyPath];
+    [_mappings addObject:mapping];
+    return mapping;
+}
+
+- (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath withConfig:(ESObjectsConstructorConfig *)config {
+    ESObjectPropertyMapping *mapping = [self mapKeyPath:sourceKeyPath];
+    mapping.destinationConfig = config;
+    return mapping;
+}
+
+- (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath withValueTransformer:(id <ESObjectValueTransformerProtocol>)valueTransformer {
+    ESObjectPropertyMapping *mapping = [self mapKeyPath:sourceKeyPath];
+    mapping.valueTransformer = valueTransformer;
+    return mapping;
 }
 
 @end

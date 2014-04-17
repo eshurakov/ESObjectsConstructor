@@ -11,9 +11,25 @@
 NSString * const ESObjectsConstructorErrorDomain = @"ESObjectsConstructorErrorDomain";
 
 @implementation ESObjectsConstructor
+{
+    id <ESObjectValueTransformerProtocol> _defaultValueTransformer;
+}
+
+- (instancetype)init {
+    return [self initWithDefaultValueTransformer:nil];
+}
+
+- (instancetype)initWithDefaultValueTransformer:(id <ESObjectValueTransformerProtocol>)defaultValueTransformer {
+    NSParameterAssert(defaultValueTransformer);
+    self = [super init];
+    if (self) {
+        _defaultValueTransformer = defaultValueTransformer;
+    }
+    return self;
+}
 
 - (id)mapData:(id)data withConfig:(ESObjectsConstructorConfig *)config error:(NSError **)error {
-    ESObjectsConstructionOperation *operation = [[ESObjectsConstructionOperation alloc] initWithData:data config:config];
+    ESObjectsConstructionOperation *operation = [[ESObjectsConstructionOperation alloc] initWithData:data config:config defaultValueTransformer:_defaultValueTransformer];
     [operation execute];
     
     if (error) {

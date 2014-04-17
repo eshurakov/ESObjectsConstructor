@@ -15,25 +15,32 @@
 #import "ESPropertyInspector.h"
 #import "ESObjectProperty.h"
 
+#import "ESObjectValueTransformerProtocol.h"
+
 @implementation ESObjectsConstructionOperation
 {
     id _data;
     ESObjectsConstructorConfig *_config;
+    
+    id<ESObjectValueTransformerProtocol> _defaultValueTransformer;
     
     NSMutableArray *_errors;
     NSMutableArray *_breadcrumbs;
 }
 
 - (instancetype)init {
-    return [self initWithData:nil config:nil];
+    return [self initWithData:nil config:nil defaultValueTransformer:nil];
 }
 
-- (instancetype)initWithData:(id)data config:(ESObjectsConstructorConfig *)config {
+- (instancetype)initWithData:(id)data config:(ESObjectsConstructorConfig *)config defaultValueTransformer:(id<ESObjectValueTransformerProtocol>)defaultValueTransformer {
     NSParameterAssert(config);
+    NSParameterAssert(defaultValueTransformer);
+    
     self = [super init];
     if (self) {
         _data = data;
         _config = config;
+        _defaultValueTransformer = defaultValueTransformer;
         _breadcrumbs = [[NSMutableArray alloc] initWithObjects:@"", nil];
         _errors = [[NSMutableArray alloc] init];
     }
@@ -139,7 +146,7 @@
         }
         
         NSError *error = nil;
-        value = [self convertValue:value forProperty:property error:&error];
+        value = [self transformedValue:value forProperty:property withMapping:propertyMapping error:&error];
         if (error) {
             [self addErrorWithCode:ESObjectsConstructorInvalidData
                        description:error.localizedDescription];
@@ -154,7 +161,7 @@
     return object;
 }
 
-- (id)convertValue:(id)value forProperty:(ESObjectProperty *)property error:(NSError **)error {
+- (id)transformedValue:(id)value forProperty:(ESObjectProperty *)property withMapping:(ESObjectPropertyMapping *)mapping error:(NSError **)error {
     if (property.type == ESObjectPropertyTypeID) {
         if (!value || [value isKindOfClass:[NSNull class]]) {
             return nil;
@@ -166,45 +173,21 @@
         class = [NSNumber class];
     }
     
-    if (!class || [value isKindOfClass:class]) {
-        return value;
+    id result = nil;
+    
+    if (mapping.valueTransformer) {
+        result = [mapping.valueTransformer trasformValue:value toClass:class];
+    } else {
+        result = [_defaultValueTransformer trasformValue:value toClass:class];
     }
     
-    if ([class isEqual:[NSString class]]) {
-        if ([value respondsToSelector:@selector(stringValue)]) {
-            return [value stringValue];
-        }
-    } else if ([class isEqual:[NSNumber class]] && [value isKindOfClass:[NSString class]]) {
-        static NSNumberFormatter *numberFormatter = nil;
-        if (numberFormatter == nil) {
-            numberFormatter = [[NSNumberFormatter alloc] init];
-            [numberFormatter setNumberStyle:NSNumberFormatterDecimalStyle];
-            [numberFormatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
-        }
-        
-        NSNumber *result = [numberFormatter numberFromString:value];
-        if (result) {
-            return result;
-        }
-    } else if ([class isEqual:[NSDecimalNumber class]] && [value isKindOfClass:[NSString class]]) {
-        NSDecimalNumber *result = [NSDecimalNumber decimalNumberWithString:value];
-        if (result && ![result isEqual:[NSDecimalNumber notANumber]]) {
-            return result;
-        }
-    } else if ([class isEqual:[NSDate class]] && [value isKindOfClass:[NSNumber class]]) {
-        NSDate *result = [NSDate dateWithTimeIntervalSince1970:([value longLongValue] / 1000.0)];
-        if (result) {
-            return result;
-        }
-    }
-    
-    if (error) {
+    if (!result && error) {
         *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
                                      code:ESObjectsConstructorMissingValue
                                  userInfo:@{NSLocalizedDescriptionKey: @"can't convert value"}];
     }
     
-    return nil;
+    return result;
 }
 
 - (void)addErrorWithCode:(NSInteger)code description:(NSString *)description {

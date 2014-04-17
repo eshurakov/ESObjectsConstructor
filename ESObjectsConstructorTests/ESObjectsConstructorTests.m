@@ -11,6 +11,9 @@
 #import "ESObjectsConstructorConfig.h"
 #import "ESObjectMapping.h"
 
+#import "ESObjectDefaultValueTransformer.h"
+#import "ESObjectTestStringTransformer.h"
+
 #define HC_SHORTHAND
 #import <OCHamcrest/OCHamcrest.h>
 
@@ -43,7 +46,8 @@
 - (void)setUp {
     [super setUp];
     
-    _objectsConstructor = [[ESObjectsConstructor alloc] init];
+    ESObjectDefaultValueTransformer *transformer = [[ESObjectDefaultValueTransformer alloc] init];
+    _objectsConstructor = [[ESObjectsConstructor alloc] initWithDefaultValueTransformer:transformer];
 }
 
 - (void)testFailIfObjectDoesntHaveRequiredProperty {
@@ -233,7 +237,7 @@
     
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
     [config mapProperties:@[@"numberField", @"doubleField"]];
-    [config mapKeyPath:@"testModel" toProperty:@"testModel" config:[ESObjectsConstructorConfig objectWithMapping:foreignConfig]];
+    [config mapKeyPath:@"testModel" withConfig:[ESObjectsConstructorConfig objectWithMapping:foreignConfig]];
     
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
@@ -282,6 +286,23 @@
     [self testFields:@{@"stringField" : @"test1"} inModel:results[0][0]];
     [self testFields:@{@"stringField" : @"test3"} inModel:results[0][1]];
     [self testFields:@{@"stringField" : @"test2"} inModel:results[2][0]];
+}
+
+- (void)testValueTransformer {
+    NSDictionary *json = @{@"stringField": @"test",
+                           @"numberField" : @2.4535,
+                           @"doubleField" : @3.145142342};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:@[@"numberField", @"doubleField"]];
+    [config mapKeyPath:@"stringField" withValueTransformer:[[ESObjectTestStringTransformer alloc] init]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    assertThat(error, nilValue());
+    [self testFields:@{@"stringField": @"test-test",
+                       @"numberField" : @2.4535,
+                       @"doubleField" : @3.145142342} inModel:model];
 }
 
 #pragma mark -

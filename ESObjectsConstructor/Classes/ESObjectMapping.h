@@ -8,6 +8,9 @@
 #import <Foundation/Foundation.h>
 
 @class ESObjectsConstructorConfig;
+@class ESObjectPropertyMapping;
+
+@protocol ESObjectValueTransformerProtocol;
 
 @interface ESObjectMapping : NSObject
 
@@ -17,12 +20,16 @@
 - (instancetype)initWithModelClass:(Class)modelClass;
 
 - (void)mapKeyPath:(NSString *)sourceKeyPath
-		toProperty:(NSString *)destinationProperty;
+		toProperty:(NSString *)destinationProperty __attribute__((deprecated));
 
 - (void)mapKeyPath:(NSString *)sourceKeyPath
 		toProperty:(NSString *)destinationProperty
-			config:(ESObjectsConstructorConfig *)config;
+			config:(ESObjectsConstructorConfig *)config __attribute__((deprecated));
 
 - (void)mapProperties:(NSArray *)properties;
+
+- (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath;
+- (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath withConfig:(ESObjectsConstructorConfig *)config;
+- (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath withValueTransformer:(id <ESObjectValueTransformerProtocol>)valueTransformer;
 
 @end

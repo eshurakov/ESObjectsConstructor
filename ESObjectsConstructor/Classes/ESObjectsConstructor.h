@@ -17,8 +17,11 @@ typedef NS_ENUM(NSUInteger, ESObjectsConstructorErrorCode) {
 };
 
 @class ESObjectsConstructorConfig;
+@protocol ESObjectValueTransformerProtocol;
 
 @interface ESObjectsConstructor : NSObject
+
+- (instancetype)initWithDefaultValueTransformer:(id <ESObjectValueTransformerProtocol>)defaultValueTransformer;
 
 - (id)mapData:(id)data withConfig:(ESObjectsConstructorConfig *)config error:(NSError **)error;
 
