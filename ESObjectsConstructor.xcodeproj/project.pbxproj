@@ -33,6 +33,7 @@
 		A6D4161F19005FD000DC84CC /* ESObjectDefaultValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = A6D4161E19005FD000DC84CC /* ESObjectDefaultValueTransformer.m */; };
 		A6D4162019005FD000DC84CC /* ESObjectDefaultValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = A6D4161E19005FD000DC84CC /* ESObjectDefaultValueTransformer.m */; };
 		A6D416231900668600DC84CC /* ESObjectTestStringTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = A6D416221900668600DC84CC /* ESObjectTestStringTransformer.m */; };
+		A6D4162619006AE300DC84CC /* ESObjectEnumValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = A6D4162519006AE300DC84CC /* ESObjectEnumValueTransformer.m */; };
 		A6FD24BE18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = A6FD24BD18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m */; };
 		A6FD24BF18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = A6FD24BD18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m */; };
 /* End PBXBuildFile section */
@@ -80,6 +81,8 @@
 		A6D4161E19005FD000DC84CC /* ESObjectDefaultValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESObjectDefaultValueTransformer.m; sourceTree = "<group>"; };
 		A6D416211900668600DC84CC /* ESObjectTestStringTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESObjectTestStringTransformer.h; sourceTree = "<group>"; };
 		A6D416221900668600DC84CC /* ESObjectTestStringTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESObjectTestStringTransformer.m; sourceTree = "<group>"; };
+		A6D4162419006AE300DC84CC /* ESObjectEnumValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESObjectEnumValueTransformer.h; sourceTree = "<group>"; };
+		A6D4162519006AE300DC84CC /* ESObjectEnumValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESObjectEnumValueTransformer.m; sourceTree = "<group>"; };
 		A6FD24BC18CE6EE00030D2A9 /* ESObjectsConstructorConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESObjectsConstructorConfig.h; sourceTree = "<group>"; };
 		A6FD24BD18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESObjectsConstructorConfig.m; sourceTree = "<group>"; };
 		D3CF759FCC1344E8B4F4C13E /* libPods-ESObjectsConstructorTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ESObjectsConstructorTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -200,6 +203,8 @@
 				A6D4161C19005F4900DC84CC /* ESObjectValueTransformerProtocol.h */,
 				A6D4161D19005FD000DC84CC /* ESObjectDefaultValueTransformer.h */,
 				A6D4161E19005FD000DC84CC /* ESObjectDefaultValueTransformer.m */,
+				A6D4162419006AE300DC84CC /* ESObjectEnumValueTransformer.h */,
+				A6D4162519006AE300DC84CC /* ESObjectEnumValueTransformer.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -346,6 +351,7 @@
 				A61B914318CCD92B00383D54 /* ESObjectProperty.m in Sources */,
 				A60AD14B18CCCBA50070B3EA /* main.m in Sources */,
 				A6AB682318D101BF00283822 /* ESObjectsConstructionOperation.m in Sources */,
+				A6D4162619006AE300DC84CC /* ESObjectEnumValueTransformer.m in Sources */,
 				A6FD24BE18CE6EE00030D2A9 /* ESObjectsConstructorConfig.m in Sources */,
 				A61B915118CCD9D900383D54 /* ESObjectsConstructor.m in Sources */,
 				A61B915318CCD9D900383D54 /* ESObjectPropertyMapping.m in Sources */,
