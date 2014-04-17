@@ -8,20 +8,39 @@
 #import "ESObjectsConstructorConfig.h"
 #import "ESObjectMapping.h"
 
+@interface ESObjectsConstructorConfig ()
+@property(nonatomic, assign, readwrite) ESObjectsConstructorConfigType type;
+@property(nonatomic, strong, readwrite) ESObjectMapping *objectMapping;
+@property(nonatomic, strong, readwrite) ESObjectsConstructorConfig *config;
+@end
+
 @implementation ESObjectsConstructorConfig
 
-- (instancetype)init {
-    return [self initWithType:0 objectMapping:nil];
++ (instancetype)objectWithMapping:(ESObjectMapping *)objectMapping {
+    NSParameterAssert(objectMapping);
+    
+    ESObjectsConstructorConfig *config = [[[self class] alloc] init];
+    config.type = ESObjectsConstructorConfigObject;
+    config.objectMapping = objectMapping;
+    return config;
 }
 
-- (instancetype)initWithType:(ESObjectsConstructorConfigType)type objectMapping:(ESObjectMapping *)objectMapping {
++ (instancetype)collectionWithObjectMapping:(ESObjectMapping *)objectMapping {
     NSParameterAssert(objectMapping);
-    self = [super init];
-    if (self) {
-        _type = type;
-        _objectMapping = objectMapping;
-    }
-    return self;
+    
+    ESObjectsConstructorConfig *config = [[[self class] alloc] init];
+    config.type = ESObjectsConstructorConfigCollection;
+    config.config = [self objectWithMapping:objectMapping];
+    return config;
+}
+
++ (instancetype)collectionOfCollectionsWithObjectMapping:(ESObjectMapping *)objectMapping {
+    NSParameterAssert(objectMapping);
+    
+    ESObjectsConstructorConfig *config = [[[self class] alloc] init];
+    config.type = ESObjectsConstructorConfigCollection;
+    config.config = [self collectionWithObjectMapping:objectMapping];
+    return config;
 }
 
 @end

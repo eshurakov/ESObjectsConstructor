@@ -56,7 +56,7 @@
             
         case ESObjectsConstructorConfigCollection:
             result = [self constructObjectsFromArray:data
-                                         withMapping:config.objectMapping];
+                                          withConfig:config.config];
             break;
             
         default:
@@ -68,9 +68,8 @@
     return result;
 }
 
-- (NSArray *)constructObjectsFromArray:(NSArray *)objects
-                           withMapping:(ESObjectMapping *)objectMapping {
-    NSParameterAssert(objectMapping);
+- (NSArray *)constructObjectsFromArray:(NSArray *)objects withConfig:(ESObjectsConstructorConfig *)config {
+    NSParameterAssert(config);
     
     if (![objects isKindOfClass:[NSArray class]]) {
         [self addErrorWithCode:ESObjectsConstructorInvalidData
@@ -80,10 +79,10 @@
     
     NSMutableArray *results = [[NSMutableArray alloc] init];
     
-    [objects enumerateObjectsUsingBlock:^(NSDictionary *objectData, NSUInteger idx, BOOL *stop) {
+    [objects enumerateObjectsUsingBlock:^(id objectData, NSUInteger idx, BOOL *stop) {
         [_breadcrumbs addObject:[NSString stringWithFormat:@"%lu", (unsigned long)idx]];
-        id object = [self constructObjectFromDictionary:objectData
-                                            withMapping:objectMapping];
+        id object = [self mapData:objectData withConfig:config];
+        
         if (object) {
             [results addObject:object];
         }

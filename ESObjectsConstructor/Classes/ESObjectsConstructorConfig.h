@@ -18,7 +18,10 @@ typedef NS_ENUM(NSUInteger, ESObjectsConstructorConfigType) {
 
 @property(nonatomic, assign, readonly) ESObjectsConstructorConfigType type;
 @property(nonatomic, strong, readonly) ESObjectMapping *objectMapping;
+@property(nonatomic, strong, readonly) ESObjectsConstructorConfig *config;
 
-- (instancetype)initWithType:(ESObjectsConstructorConfigType)type objectMapping:(ESObjectMapping *)objectMapping;
++ (instancetype)objectWithMapping:(ESObjectMapping *)objectMapping;
++ (instancetype)collectionWithObjectMapping:(ESObjectMapping *)objectMapping;
++ (instancetype)collectionOfCollectionsWithObjectMapping:(ESObjectMapping *)objectMapping;
 
 @end

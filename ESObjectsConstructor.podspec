@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name     = 'ESObjectsConstructor'
-  s.version  = '0.7'
+  s.version  = '0.8'
   s.license  = 'MIT'
   s.summary  = 'Objects constructor'
   s.homepage = 'https://github.com/eshurakov/ESObjectsConstructor'
