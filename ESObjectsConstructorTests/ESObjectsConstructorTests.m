@@ -10,6 +10,7 @@
 #import "ESObjectsConstructor.h"
 #import "ESObjectsConstructorConfig.h"
 #import "ESObjectMapping.h"
+#import "ESObjectPropertyMapping.h"
 
 #import "ESObjectDefaultValueTransformer.h"
 #import "ESObjectTestStringTransformer.h"
@@ -136,9 +137,9 @@
                            @"double_field" : @3.145142342};
     
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
-    [config mapKeyPath:@"string_field" toProperty:@"stringField"];
-    [config mapKeyPath:@"number_field" toProperty:@"numberField"];
-    [config mapKeyPath:@"double_field" toProperty:@"doubleField"];
+    [[config mapKeyPath:@"string_field"] setDestinationKeyPath:@"stringField"];
+    [[config mapKeyPath:@"number_field"] setDestinationKeyPath:@"numberField"];
+    [[config mapKeyPath:@"double_field"] setDestinationKeyPath:@"doubleField"];
     
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
