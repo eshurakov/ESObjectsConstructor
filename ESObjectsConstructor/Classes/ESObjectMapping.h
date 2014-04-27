@@ -9,6 +9,7 @@
 
 @class ESObjectsConstructorConfig;
 @class ESObjectPropertyMapping;
+@class ESObjectProperty;
 
 @protocol ESObjectValueTransformerProtocol;
 
@@ -19,17 +20,17 @@
 
 - (instancetype)initWithModelClass:(Class)modelClass;
 
-- (void)mapKeyPath:(NSString *)sourceKeyPath
-		toProperty:(NSString *)destinationProperty __attribute__((deprecated));
-
-- (void)mapKeyPath:(NSString *)sourceKeyPath
-		toProperty:(NSString *)destinationProperty
-			config:(ESObjectsConstructorConfig *)config __attribute__((deprecated));
-
 - (void)mapProperties:(NSArray *)properties;
 
 - (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath;
 - (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath withConfig:(ESObjectsConstructorConfig *)config;
 - (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath withValueTransformer:(id <ESObjectValueTransformerProtocol>)valueTransformer;
+
+#pragma mark -
+
+- (id)newResultObject;
+- (BOOL)canMapObjectOfClass:(Class)objectClass;
+
+- (void)enumerateMappingsWithBlock:(void (^)(ESObjectPropertyMapping *mapping, ESObjectProperty *property, BOOL *stop))block;
 
 @end

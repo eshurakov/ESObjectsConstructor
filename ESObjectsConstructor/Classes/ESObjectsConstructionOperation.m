@@ -12,7 +12,6 @@
 #import "ESObjectPropertyMapping.h"
 #import "ESObjectsConstructorConfig.h"
 
-#import "ESPropertyInspector.h"
 #import "ESObjectProperty.h"
 
 #import "ESObjectValueTransformerProtocol.h"
@@ -57,8 +56,8 @@
     id result = nil;
     switch (config.type) {
         case ESObjectsConstructorConfigObject:
-            result = [self constructObjectFromDictionary:data
-                                             withMapping:config.objectMapping];
+            result = [self constructObjectFromObject:data
+                                         withMapping:config.objectMapping];
             break;
             
         case ESObjectsConstructorConfigCollection:
@@ -99,45 +98,49 @@
     return results;
 }
 
-- (id)constructObjectFromDictionary:(NSDictionary *)objectDict
-                        withMapping:(ESObjectMapping *)objectMapping {
+- (id)constructObjectFromObject:(NSDictionary *)sourceObject
+                    withMapping:(ESObjectMapping *)objectMapping {
     NSParameterAssert(objectMapping);
-    if (![objectDict isKindOfClass:[NSDictionary class]]) {
+    
+    if (![objectMapping canMapObjectOfClass:[sourceObject class]]) {
         [self addErrorWithCode:ESObjectsConstructorInvalidData
-                   description:[NSString stringWithFormat:@"expected dict, but got %@", [objectDict class]]];
+                   description:[NSString stringWithFormat:@"can't map source object with class %@", [sourceObject class]]];
         return nil;
     }
     
-    id object = [[objectMapping.modelClass alloc] init];
-    if (!object) {
+    __block id resultObject = [objectMapping newResultObject];
+    if (!resultObject) {
         [self addErrorWithCode:ESObjectsConstructorNilModel
-                   description:[NSString stringWithFormat:@"couldn't create object with class: %@", objectMapping.modelClass]];
+                   description:@"couldn't create result object"];
         return nil;
     }
     
-    for (ESObjectPropertyMapping *propertyMapping in objectMapping.mappings) {
+    [objectMapping enumerateMappingsWithBlock:^(ESObjectPropertyMapping *propertyMapping, ESObjectProperty *property, BOOL *stop) {
         [_breadcrumbs addObject:propertyMapping.sourceKeyPath];
-        
-        ESObjectProperty *property = [ESPropertyInspector propertyWithName:propertyMapping.destinationKeyPath
-                                                                 fromClass:objectMapping.modelClass];
         
         if (!property || property.type == ESObjectPropertyTypeUnknown) {
             [self addErrorWithCode:ESObjectsConstructorUnknownProperty
                        description:[NSString stringWithFormat:@"unknown property: %@", propertyMapping.destinationKeyPath]];
             [_breadcrumbs removeLastObject];
-            return nil;
+            
+            resultObject = nil;
+            *stop = YES;
+            return;
         }
         
-        id value = [objectDict valueForKeyPath:propertyMapping.sourceKeyPath];
+        id value = [sourceObject valueForKeyPath:propertyMapping.sourceKeyPath];
         if (!value) {
             if (propertyMapping.optional) {
-                continue;
+                return;
             }
-           
+            
             [self addErrorWithCode:ESObjectsConstructorMissingValue
                        description:@"missing value"];
             [_breadcrumbs removeLastObject];
-            return nil;
+            
+            resultObject = nil;
+            *stop = YES;
+            return;
         }
         
         if (propertyMapping.destinationConfig) {
@@ -151,14 +154,17 @@
             [self addErrorWithCode:ESObjectsConstructorInvalidData
                        description:error.localizedDescription];
             [_breadcrumbs removeLastObject];
-            return nil;
+            
+            resultObject = nil;
+            *stop = YES;
+            return;
         }
         
-        [object setValue:value forKey:propertyMapping.destinationKeyPath];
+        [resultObject setValue:value forKey:propertyMapping.destinationKeyPath];
         [_breadcrumbs removeLastObject];
-    }
-    
-    return object;
+    }];
+        
+    return resultObject;
 }
 
 - (id)transformedValue:(id)value forProperty:(ESObjectProperty *)property withMapping:(ESObjectPropertyMapping *)mapping error:(NSError **)error {

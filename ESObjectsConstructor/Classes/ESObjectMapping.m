@@ -8,6 +8,8 @@
 #import "ESObjectMapping.h"
 #import "ESObjectPropertyMapping.h"
 
+#import "ESPropertyInspector.h"
+
 @implementation ESObjectMapping {
     NSMutableArray *_mappings;
 }
@@ -24,17 +26,6 @@
         _modelClass = modelClass;
     }
     return self;
-}
-
-- (void)mapKeyPath:(NSString *)sourceKeyPath toProperty:(NSString *)destinationProperty {
-    ESObjectPropertyMapping *mapping = [self mapKeyPath:sourceKeyPath];
-    mapping.destinationKeyPath = destinationProperty;
-}
-
-- (void)mapKeyPath:(NSString *)sourceKeyPath toProperty:(NSString *)destinationProperty config:(ESObjectsConstructorConfig *)config {
-    ESObjectPropertyMapping *mapping = [self mapKeyPath:sourceKeyPath];
-    mapping.destinationKeyPath = destinationProperty;
-    mapping.destinationConfig = config;
 }
 
 - (void)mapProperties:(NSArray *)properties {
@@ -60,6 +51,30 @@
     ESObjectPropertyMapping *mapping = [self mapKeyPath:sourceKeyPath];
     mapping.valueTransformer = valueTransformer;
     return mapping;
+}
+
+#pragma mark -
+
+- (id)newResultObject {
+    return [[_modelClass alloc] init];
+}
+
+- (BOOL)canMapObjectOfClass:(Class)objectClass {
+    return [objectClass isSubclassOfClass:[NSDictionary class]];
+}
+
+- (void)enumerateMappingsWithBlock:(void (^)(ESObjectPropertyMapping *mapping, ESObjectProperty *property, BOOL *stop))block {
+    NSParameterAssert(block);
+    
+    BOOL stop = NO;
+    for (ESObjectPropertyMapping *mapping in self.mappings) {
+        ESObjectProperty *property = [ESPropertyInspector propertyWithName:mapping.destinationKeyPath
+                                                                 fromClass:_modelClass];
+        block(mapping, property, &stop);
+        if (stop) {
+            return;
+        }
+    }
 }
 
 @end

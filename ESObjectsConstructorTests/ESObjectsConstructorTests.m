@@ -15,24 +15,13 @@
 #import "ESObjectDefaultValueTransformer.h"
 #import "ESObjectTestStringTransformer.h"
 
+#import "TestProductModel.h"
+
 #define HC_SHORTHAND
 #import <OCHamcrest/OCHamcrest.h>
 
 #define MOCKITO_SHORTHAND
 #import <OCMockito/OCMockito.h>
-
-@interface TestProductModel : NSObject
-@property(nonatomic, strong) NSString *stringField;
-@property(nonatomic, strong) NSNumber *numberField;
-@property(nonatomic, strong) NSDecimalNumber *decimalField;
-@property(nonatomic, assign) double doubleField;
-@property(nonatomic, strong) TestProductModel *testModel;
-@property(nonatomic, strong) NSDate *dateField;
-@end
-
-@implementation TestProductModel
-
-@end
 
 
 @interface ESObjectsConstructorTests : XCTestCase
@@ -47,8 +36,7 @@
 - (void)setUp {
     [super setUp];
     
-    ESObjectDefaultValueTransformer *transformer = [[ESObjectDefaultValueTransformer alloc] init];
-    _objectsConstructor = [[ESObjectsConstructor alloc] initWithDefaultValueTransformer:transformer];
+    _objectsConstructor = [[ESObjectsConstructor alloc] init];
 }
 
 - (void)testFailIfObjectDoesntHaveRequiredProperty {
