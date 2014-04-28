@@ -167,13 +167,7 @@
     return resultObject;
 }
 
-- (id)transformedValue:(id)value forProperty:(ESObjectProperty *)property withMapping:(ESObjectPropertyMapping *)mapping error:(NSError **)error {
-    if (property.type == ESObjectPropertyTypeID) {
-        if (!value || [value isKindOfClass:[NSNull class]]) {
-            return nil;
-        }
-    }
-    
+- (id)transformedValue:(id)value forProperty:(ESObjectProperty *)property withMapping:(ESObjectPropertyMapping *)mapping error:(NSError **)error {    
     Class class = property.propertyClass;
     if (!class && [property isPrimitive]) {
         class = [NSNumber class];
