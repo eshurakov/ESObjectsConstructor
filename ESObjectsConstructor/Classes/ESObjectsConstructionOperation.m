@@ -131,6 +131,7 @@
         id value = [sourceObject valueForKeyPath:propertyMapping.sourceKeyPath];
         if (!value) {
             if (propertyMapping.optional) {
+                [_breadcrumbs removeLastObject];
                 return;
             }
             
