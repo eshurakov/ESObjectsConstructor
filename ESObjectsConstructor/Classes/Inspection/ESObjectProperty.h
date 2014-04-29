@@ -21,7 +21,8 @@ typedef NS_ENUM(NSUInteger, ESObjectPropertyType) {
     ESObjectPropertyTypeUnsignedLong,
     ESObjectPropertyTypeUnsignedLongLong,
     ESObjectPropertyTypeFloat,
-    ESObjectPropertyTypeDouble
+    ESObjectPropertyTypeDouble,
+    ESObjectPropertyTypeBool
 };
 
 @interface ESObjectProperty : NSObject

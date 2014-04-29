@@ -208,6 +208,9 @@ static NSMutableDictionary *propertyInspectorChainCache = nil;
                     case 'd': // double
                         property.type = ESObjectPropertyTypeDouble;
                         break;
+                    case 'B': // bool
+                        property.type = ESObjectPropertyTypeBool;
+                        break;
 
                     case '{': // struct
                     case 'b': // bitfield

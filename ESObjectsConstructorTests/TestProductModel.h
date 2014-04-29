@@ -15,5 +15,6 @@
 @property(nonatomic, assign) double doubleField;
 @property(nonatomic, strong) TestProductModel *testModel;
 @property(nonatomic, strong) NSDate *dateField;
+@property(nonatomic, assign) BOOL boolField;
 
 @end

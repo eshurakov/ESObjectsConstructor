@@ -108,7 +108,8 @@
 - (void)testDirectMapping {
     NSDictionary *json = @{@"stringField": @"test",
                            @"numberField" : @2.4535,
-                           @"doubleField" : @3.145142342};
+                           @"doubleField" : @3.145142342,
+                           @"boolField" : @(YES)};
     
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
     [config mapProperties:[json allKeys]];
