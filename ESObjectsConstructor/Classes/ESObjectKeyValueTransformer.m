@@ -5,9 +5,9 @@
 //  Copyright (c) 2014 Evgeny Shurakov. All rights reserved.
 //
 
-#import "ESObjectEnumValueTransformer.h"
+#import "ESObjectKeyValueTransformer.h"
 
-@implementation ESObjectEnumValueTransformer
+@implementation ESObjectKeyValueTransformer
 {
     NSMutableDictionary *_map;
 }
@@ -20,20 +20,22 @@
     return self;
 }
 
-- (void)mapString:(NSString *)string toValue:(NSNumber *)value {
-    [_map setValue:value forKey:string];
+- (void)setObject:(id)object forKey:(id<NSCopying>)key {
+    _map[key] = object;
 }
 
 - (id)trasformValue:(id)value toClass:(Class)class {
-    if (![class isEqual:[NSNumber class]]) {
+    if (!value) {
         return nil;
     }
     
-    if (![value isKindOfClass:[NSString class]]) {
-        return nil;
+    value = _map[value];
+    
+    if (!class || (class && [value isKindOfClass:class])) {
+        return value;
     }
     
-    return _map[value];
+    return nil;
 }
 
 @end
