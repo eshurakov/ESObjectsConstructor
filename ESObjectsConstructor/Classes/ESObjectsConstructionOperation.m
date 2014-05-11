@@ -8,7 +8,7 @@
 #import "ESObjectsConstructionOperation.h"
 #import "ESObjectsConstructor.h"
 
-#import "ESObjectMapping.h"
+#import "ESObjectMappingProtocol.h"
 #import "ESObjectPropertyMapping.h"
 #import "ESObjectsConstructorConfig.h"
 
@@ -21,97 +21,108 @@
     id _data;
     ESObjectsConstructorConfig *_config;
     
-    id<ESObjectValueTransformerProtocol> _defaultValueTransformer;
-    
-    NSMutableArray *_errors;
     NSMutableArray *_breadcrumbs;
+    NSError *_error;
 }
 
 - (instancetype)init {
-    return [self initWithData:nil config:nil defaultValueTransformer:nil];
+    return [self initWithData:nil config:nil];
 }
 
-- (instancetype)initWithData:(id)data config:(ESObjectsConstructorConfig *)config defaultValueTransformer:(id<ESObjectValueTransformerProtocol>)defaultValueTransformer {
+- (instancetype)initWithData:(id)data config:(ESObjectsConstructorConfig *)config {
     NSParameterAssert(config);
-    NSParameterAssert(defaultValueTransformer);
     
     self = [super init];
     if (self) {
         _data = data;
         _config = config;
-        _defaultValueTransformer = defaultValueTransformer;
+        
         _breadcrumbs = [[NSMutableArray alloc] initWithObjects:@"", nil];
-        _errors = [[NSMutableArray alloc] init];
     }
     return self;
 }
 
-- (void)execute {
-    _resultData = [self mapData:_data withConfig:_config];
+- (id)execute:(NSError *__autoreleasing *)error {
+    NSError *localError = nil;
+    id result = [self mapData:_data withConfig:_config error:&localError];
+    
+    if (error) {
+        *error = localError;
+    }
+    return result;
 }
 
-- (id)mapData:(id)data withConfig:(ESObjectsConstructorConfig *)config {
+- (id)mapData:(id)data withConfig:(ESObjectsConstructorConfig *)config error:(NSError *__autoreleasing *)error {
     NSParameterAssert(config);
     
     id result = nil;
     switch (config.type) {
         case ESObjectsConstructorConfigObject:
             result = [self constructObjectFromObject:data
-                                         withMapping:config.objectMapping];
+                                         withMapping:config.objectMapping
+                                               error:error];
             break;
             
         case ESObjectsConstructorConfigCollection:
             result = [self constructObjectsFromArray:data
-                                          withConfig:config.config];
+                                          withConfig:config.config
+                                               error:error];
             break;
             
         default:
-            [self addErrorWithCode:ESObjectsConstructorInvalidData
-                       description:[NSString stringWithFormat:@"invalid config type: %lu", config.type]];
+            *error = [self errorWithCode:ESObjectsConstructorInvalidData description:[NSString stringWithFormat:@"invalid config type: %lu", config.type]];
             break;
+    }
+    
+    if (*error) {
+        return nil;
     }
     
     return result;
 }
 
-- (NSArray *)constructObjectsFromArray:(NSArray *)objects withConfig:(ESObjectsConstructorConfig *)config {
+- (NSArray *)constructObjectsFromArray:(NSArray *)objects withConfig:(ESObjectsConstructorConfig *)config error:(NSError *__autoreleasing *)error {
     NSParameterAssert(config);
     
     if (![objects isKindOfClass:[NSArray class]]) {
-        [self addErrorWithCode:ESObjectsConstructorInvalidData
-                   description:[NSString stringWithFormat:@"expected array, but got %@", [objects class]]];
+        *error = [self errorWithCode:ESObjectsConstructorInvalidData
+                         description:[NSString stringWithFormat:@"expected array, but got %@", [objects class]]];
         return nil;
     }
     
     NSMutableArray *results = [[NSMutableArray alloc] init];
     
-    [objects enumerateObjectsUsingBlock:^(id objectData, NSUInteger idx, BOOL *stop) {
+    NSUInteger idx = 0;
+    for (id objectData in objects) {
         [_breadcrumbs addObject:[NSString stringWithFormat:@"%lu", (unsigned long)idx]];
-        id object = [self mapData:objectData withConfig:config];
-        
-        if (object) {
-            [results addObject:object];
-        }
+        id object = [self mapData:objectData withConfig:config error:error];
         [_breadcrumbs removeLastObject];
-    }];
-    
+        
+        if (*error) {
+            return nil;
+        }
+        
+        [results addObject:object];
+        ++idx;
+    }
+        
     return results;
 }
 
 - (id)constructObjectFromObject:(NSDictionary *)sourceObject
-                    withMapping:(ESObjectMapping *)objectMapping {
+                    withMapping:(id <ESObjectMappingProtocol>)objectMapping
+                          error:(NSError *__autoreleasing *)error {
     NSParameterAssert(objectMapping);
     
     if (![objectMapping canMapObjectOfClass:[sourceObject class]]) {
-        [self addErrorWithCode:ESObjectsConstructorInvalidData
-                   description:[NSString stringWithFormat:@"can't map source object with class %@", [sourceObject class]]];
+        *error = [self errorWithCode:ESObjectsConstructorInvalidData
+                         description:[NSString stringWithFormat:@"can't map source object with class %@", [sourceObject class]]];
         return nil;
     }
     
     __block id resultObject = [objectMapping newResultObject];
     if (!resultObject) {
-        [self addErrorWithCode:ESObjectsConstructorNilModel
-                   description:@"couldn't create result object"];
+        *error = [self errorWithCode:ESObjectsConstructorNilModel description:@"couldn't create result object"];
         return nil;
     }
     
@@ -119,8 +130,8 @@
         [_breadcrumbs addObject:propertyMapping.sourceKeyPath];
         
         if (!property || property.type == ESObjectPropertyTypeUnknown) {
-            [self addErrorWithCode:ESObjectsConstructorUnknownProperty
-                       description:[NSString stringWithFormat:@"unknown property: %@", propertyMapping.destinationKeyPath]];
+            *error = [self errorWithCode:ESObjectsConstructorUnknownProperty
+                             description:[NSString stringWithFormat:@"unknown property: %@", propertyMapping.destinationKey]];
             [_breadcrumbs removeLastObject];
             
             resultObject = nil;
@@ -129,14 +140,39 @@
         }
         
         id value = [sourceObject valueForKeyPath:propertyMapping.sourceKeyPath];
-        if (!value) {
-            if (propertyMapping.optional) {
+        if (!value && propertyMapping.optional) {
+            [_breadcrumbs removeLastObject];
+            return;
+        }
+
+        if (value && ![value isKindOfClass:[NSNull class]] &&
+            ![property isPrimitive] && propertyMapping.destinationConfig) {
+            value = [self mapData:value
+                       withConfig:propertyMapping.destinationConfig
+                            error:error];
+            
+            if (*error) {
                 [_breadcrumbs removeLastObject];
+                
+                resultObject = nil;
+                *stop = YES;
                 return;
             }
-            
-            [self addErrorWithCode:ESObjectsConstructorMissingValue
-                       description:@"missing value"];
+        }
+        
+        id <ESObjectValueTransformerProtocol> transformer = propertyMapping.valueTransformer ?: objectMapping.valueTransformer;
+        
+        Class class = property.propertyClass;
+        if (!class && [property isPrimitive]) {
+            class = [NSNumber class];
+        }
+        
+        NSError *transformationError = nil;
+        value = [transformer trasformValue:value toClass:class error:&transformationError];
+        
+        if (transformationError) {
+            *error = [self errorWithCode:ESObjectsConstructorInvalidData
+                             description:transformationError.localizedDescription];
             [_breadcrumbs removeLastObject];
             
             resultObject = nil;
@@ -144,59 +180,22 @@
             return;
         }
         
-        if (propertyMapping.destinationConfig) {
-            value = [self mapData:value
-                       withConfig:propertyMapping.destinationConfig];
+        if (!value && [property isPrimitive]) {
+            value = @(0);
         }
         
-        NSError *error = nil;
-        value = [self transformedValue:value forProperty:property withMapping:propertyMapping error:&error];
-        if (error) {
-            [self addErrorWithCode:ESObjectsConstructorInvalidData
-                       description:error.localizedDescription];
-            [_breadcrumbs removeLastObject];
-            
-            resultObject = nil;
-            *stop = YES;
-            return;
-        }
-        
-        [resultObject setValue:value forKey:propertyMapping.destinationKeyPath];
+        [resultObject setValue:value forKey:propertyMapping.destinationKey];
         [_breadcrumbs removeLastObject];
     }];
         
     return resultObject;
 }
 
-- (id)transformedValue:(id)value forProperty:(ESObjectProperty *)property withMapping:(ESObjectPropertyMapping *)mapping error:(NSError **)error {    
-    Class class = property.propertyClass;
-    if (!class && [property isPrimitive]) {
-        class = [NSNumber class];
-    }
-    
-    id result = nil;
-    
-    if (mapping.valueTransformer) {
-        result = [mapping.valueTransformer trasformValue:value toClass:class];
-    } else {
-        result = [_defaultValueTransformer trasformValue:value toClass:class];
-    }
-    
-    if (!result && error) {
-        *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
-                                     code:ESObjectsConstructorMissingValue
-                                 userInfo:@{NSLocalizedDescriptionKey: @"can't convert value"}];
-    }
-    
-    return result;
-}
-
-- (void)addErrorWithCode:(NSInteger)code description:(NSString *)description {
+- (NSError *)errorWithCode:(NSInteger)code description:(NSString *)description {
     description = [NSString stringWithFormat:@"%@: %@", [_breadcrumbs componentsJoinedByString:@"."], description];
-    NSError *error = [NSError errorWithDomain:ESObjectsConstructorErrorDomain
-                                         code:code
-                                     userInfo:@{NSLocalizedDescriptionKey : description}];
-    [_errors addObject:error];
+    return [NSError errorWithDomain:ESObjectsConstructorErrorDomain
+                               code:code
+                           userInfo:@{NSLocalizedDescriptionKey : description}];
 }
 
 @end

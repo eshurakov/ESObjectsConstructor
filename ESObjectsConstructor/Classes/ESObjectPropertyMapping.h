@@ -13,10 +13,11 @@
 @interface ESObjectPropertyMapping : NSObject
 
 @property(nonatomic, strong, readonly) NSString *sourceKeyPath;
-@property(nonatomic, copy) NSString *destinationKeyPath;
+
+@property(nonatomic, copy) NSString *destinationKey;
+@property(nonatomic, strong) ESObjectsConstructorConfig *destinationConfig;
 
 @property(nonatomic, strong) id <ESObjectValueTransformerProtocol> valueTransformer;
-@property(nonatomic, strong) ESObjectsConstructorConfig *destinationConfig;
 
 @property(nonatomic, assign, getter = isOptional) BOOL optional;
 

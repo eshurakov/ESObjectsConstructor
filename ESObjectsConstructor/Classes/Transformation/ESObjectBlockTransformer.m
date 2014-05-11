@@ -25,8 +25,8 @@
     return self;
 }
 
-- (id)trasformValue:(id)value toClass:(Class)class {
-    return _block(value, class);
+- (id)trasformValue:(id)value toClass:(Class)class error:(NSError *__autoreleasing *)error {
+    return _block(value, class, error);
 }
 
 @end

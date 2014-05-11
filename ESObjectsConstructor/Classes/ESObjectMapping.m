@@ -10,8 +10,12 @@
 
 #import "ESPropertyInspector.h"
 
+#import "ESObjectValueTransformerProtocol.h"
+#import "ESObjectDefaultValueTransformer.h"
+
 @implementation ESObjectMapping {
     NSMutableArray *_mappings;
+    ESObjectDefaultValueTransformer *_valueTransformer;
 }
 
 - (instancetype)init {
@@ -53,7 +57,27 @@
     return mapping;
 }
 
-#pragma mark -
+- (ESObjectProperty *)propertyForMapping:(ESObjectPropertyMapping *)mapping {
+    NSParameterAssert(mapping);
+    return [ESPropertyInspector propertyWithName:mapping.destinationKey
+                                       fromClass:_modelClass];
+}
+
+- (ESObjectPropertyMapping *)propertyMappingForKeyPath:(NSString *)keyPath {
+    if (!keyPath) {
+        return nil;
+    }
+    
+    for (ESObjectPropertyMapping *mapping in _mappings) {
+        if ([mapping.sourceKeyPath isEqualToString:keyPath]) {
+            return mapping;
+        }
+    }
+    
+    return nil;
+}
+
+#pragma mark - ESObjectMappingProtocol
 
 - (id)newResultObject {
     return [[_modelClass alloc] init];
@@ -63,13 +87,20 @@
     return [objectClass isSubclassOfClass:[NSDictionary class]];
 }
 
+- (id <ESObjectValueTransformerProtocol>)valueTransformer {
+    if (_valueTransformer == nil) {
+        _valueTransformer = [[ESObjectDefaultValueTransformer alloc] init];
+    }
+    
+    return _valueTransformer;
+}
+
 - (void)enumerateMappingsWithBlock:(void (^)(ESObjectPropertyMapping *mapping, ESObjectProperty *property, BOOL *stop))block {
     NSParameterAssert(block);
     
     BOOL stop = NO;
-    for (ESObjectPropertyMapping *mapping in self.mappings) {
-        ESObjectProperty *property = [ESPropertyInspector propertyWithName:mapping.destinationKeyPath
-                                                                 fromClass:_modelClass];
+    for (ESObjectPropertyMapping *mapping in _mappings) {
+        ESObjectProperty *property = [self propertyForMapping:mapping];
         block(mapping, property, &stop);
         if (stop) {
             return;

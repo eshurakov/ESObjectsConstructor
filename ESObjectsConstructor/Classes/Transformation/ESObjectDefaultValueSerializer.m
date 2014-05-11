@@ -9,14 +9,18 @@
 
 @implementation ESObjectDefaultValueSerializer
 
-- (id)trasformValue:(id)value toClass:(Class)class {
+- (BOOL)acceptNilValue {
+    return YES;
+}
+
+- (id)trasformValue:(id)value toClass:(Class)class error:(NSError *__autoreleasing *)error {
     static NSArray *baseClasses = nil;
     if (!baseClasses) {
         baseClasses = @[[NSString class], [NSNumber class], [NSDictionary class], [NSArray class]];
     }
     
     if (!value) {
-        return nil;
+        return [NSNull null];
     }
     
     if ([value isKindOfClass:[NSDecimalNumber class]]) {
@@ -29,6 +33,12 @@
         if ([value isKindOfClass:baseClass]) {
             return value;
         }
+    }
+    
+    if (error) {
+        *error = [NSError errorWithDomain:@""
+                                     code:0
+                                 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"'%@' is not one of the classes supported for serialization", [value class]]}];
     }
     
     return nil;

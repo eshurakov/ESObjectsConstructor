@@ -9,5 +9,5 @@
 
 @protocol ESObjectValueTransformerProtocol <NSObject>
 @required
-- (id)trasformValue:(id)value toClass:(Class)class;
+- (id)trasformValue:(id)value toClass:(Class)class error:(NSError **)error;
 @end

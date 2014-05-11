@@ -9,7 +9,22 @@
 #import "ESObjectProperty.h"
 #import "ESObjectPropertyMapping.h"
 
+#import "ESObjectValueTransformerProtocol.h"
+#import "ESObjectDefaultValueSerializer.h"
+
 @implementation ESObjectSerializationMapping
+{
+    ESObjectDefaultValueSerializer *_valueSerializer;
+}
+
+- (ESObjectProperty *)propertyForMapping:(ESObjectPropertyMapping *)mapping {
+    NSParameterAssert(mapping);
+    ESObjectProperty *property = [[ESObjectProperty alloc] initWithName:mapping.destinationKey];
+    property.type = ESObjectPropertyTypeID;
+    return property;
+}
+
+#pragma mark - ESObjectMappingProtocol
 
 - (id)newResultObject {
     return [[NSMutableDictionary alloc] init];
@@ -19,19 +34,12 @@
     return (self.modelClass && [objectClass isSubclassOfClass:self.modelClass]);
 }
 
-- (void)enumerateMappingsWithBlock:(void (^)(ESObjectPropertyMapping *mapping, ESObjectProperty *property, BOOL *stop))block {
-    NSParameterAssert(block);
-    
-    BOOL stop = NO;
-    for (ESObjectPropertyMapping *mapping in self.mappings) {
-        ESObjectProperty *property = [[ESObjectProperty alloc] initWithName:mapping.destinationKeyPath];
-        property.type = ESObjectPropertyTypeID;
-        
-        block(mapping, property, &stop);
-        if (stop) {
-            return;
-        }
+- (id <ESObjectValueTransformerProtocol>)valueTransformer {
+    if (_valueSerializer == nil) {
+        _valueSerializer = [[ESObjectDefaultValueSerializer alloc] init];
     }
+    
+    return _valueSerializer;
 }
 
 @end

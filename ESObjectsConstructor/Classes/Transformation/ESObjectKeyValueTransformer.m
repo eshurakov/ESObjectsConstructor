@@ -24,15 +24,19 @@
     _map[key] = object;
 }
 
-- (id)trasformValue:(id)value toClass:(Class)class {
-    if (!value) {
-        return nil;
+- (id)trasformValue:(id)value toClass:(Class)class error:(NSError *__autoreleasing *)error {
+    if ([value conformsToProtocol:@protocol(NSCopying)]) {
+        value = _map[value];
+        
+        if (value && (!class || (class && [value isKindOfClass:class]))) {
+            return value;
+        }
     }
     
-    value = _map[value];
-    
-    if (!class || (class && [value isKindOfClass:class])) {
-        return value;
+    if (error) {
+        *error = [NSError errorWithDomain:@""
+                                     code:0
+                                 userInfo:@{NSLocalizedDescriptionKey : @"can't convert value"}];
     }
     
     return nil;

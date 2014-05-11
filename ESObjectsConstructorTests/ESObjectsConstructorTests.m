@@ -46,7 +46,9 @@
     
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    
     assertThat(model, nilValue());
+    
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorUnknownProperty));
 }
@@ -59,9 +61,11 @@
     
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    
     assertThat(model, nilValue());
+    
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
-    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorMissingValue));
+    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
 }
 
 - (void)testFailInvalidData {
@@ -69,7 +73,9 @@
     
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:[NSSet set] withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    
     assertThat(model, nilValue());
+    
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
 }
@@ -78,7 +84,9 @@
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:nil withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    
     assertThat(model, nilValue());
+    
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
 }
@@ -87,7 +95,6 @@
     NSArray *json = @[
                       @{@"stringField" : @"test1"},
                       @{},
-                      @{@"stringField" : @"test3"},
                       ];
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
     [config mapProperties:@[@"stringField"]];
@@ -97,12 +104,9 @@
                                          withConfig:[ESObjectsConstructorConfig collectionWithObjectMapping:config]
                                               error:&error];
     assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
-    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorMissingValue));
+    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
     
-    assertThatUnsignedInteger([results count], equalToUnsignedInteger(2));
-    
-    [self testFields:@{@"stringField" : @"test1"} inModel:results[0]];
-    [self testFields:@{@"stringField" : @"test3"} inModel:results[1]];
+    assertThat(results, nilValue());
 }
 
 - (void)testDirectMapping {
@@ -120,15 +124,53 @@
     [self testFields:json inModel:model];
 }
 
+- (void)testNullMapping {
+    NSDictionary *json = @{@"stringField": [NSNull null],
+                           @"numberField" : [NSNull null],
+                           @"doubleField" : [NSNull null],
+                           @"boolField" : [NSNull null]};
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:[json allKeys]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    assertThat(error, nilValue());
+    assertThat(model.stringField, nilValue());
+    assertThat(model.numberField, nilValue());
+    assertThatDouble(model.doubleField, equalToDouble(0.0));
+    assertThatBool(model.boolField, equalToBool(NO));
+}
+
+- (void)testNullMappingForForeignAttributes {
+    NSDictionary *json = @{@"numberField" : [NSNull null],
+                           @"testModel" : [NSNull null]
+                           };
+    ESObjectMapping *foreignConfig = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [foreignConfig mapProperties:@[@"stringField"]];
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:@[@"numberField"]];
+    [config mapKeyPath:@"testModel" withConfig:[ESObjectsConstructorConfig objectWithMapping:foreignConfig]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    assertThat(error, nilValue());
+    assertThat(model, notNilValue());
+    assertThat(model.numberField, nilValue());
+    assertThat(model.testModel, nilValue());
+    
+    assertThat(model.invocations, containsInAnyOrder(@"numberField=(null)", @"testModel=(null)", nil));
+}
+
 - (void)testCustomMapping {
     NSDictionary *json = @{@"string_field": @"test",
                            @"number_field" : @2.4535,
                            @"double_field" : @3.145142342};
     
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
-    [[config mapKeyPath:@"string_field"] setDestinationKeyPath:@"stringField"];
-    [[config mapKeyPath:@"number_field"] setDestinationKeyPath:@"numberField"];
-    [[config mapKeyPath:@"double_field"] setDestinationKeyPath:@"doubleField"];
+    [[config mapKeyPath:@"string_field"] setDestinationKey:@"stringField"];
+    [[config mapKeyPath:@"number_field"] setDestinationKey:@"numberField"];
+    [[config mapKeyPath:@"double_field"] setDestinationKey:@"doubleField"];
     
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
@@ -217,6 +259,30 @@
     [self testFields:reference inModel:model];
 }
 
+- (void)testIdField {
+    NSDictionary *json = @{@"idField" : @"2.4535"};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:[json allKeys]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    assertThat(error, nilValue());
+    assertThat(model.idField, equalTo(@"2.4535"));
+}
+
+- (void)testIdFieldAndNullValue {
+    NSDictionary *json = @{@"idField" : [NSNull null]};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:[json allKeys]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    assertThat(error, nilValue());
+    assertThat(model.invocations, containsInAnyOrder(@"idField=(null)", nil));
+}
+
 - (void)testForeignAttributes {
     NSDictionary *json = @{@"numberField" : @2.4535,
                            @"doubleField" : @3.145142342,
@@ -240,17 +306,50 @@
     [self testFields:@{@"stringField": @"hello"} inModel:model.testModel];
 }
 
-- (void)testOptionalJSONFields {
-    NSDictionary *json = @{@"stringField": @"test"};
+- (void)testForeignAttributesError {
+    NSDictionary *json = @{@"stringField" : @"hello",
+                           @"testModel" : @{@"stringFiel": @"world"}
+                           };
+    ESObjectMapping *foreignConfig = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [foreignConfig mapProperties:@[@"stringField"]];
     
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
-    [config mapProperties:@[@"stringField", @"numberField?", @"doubleField?"]];
+    [config mapProperties:@[@"stringField"]];
+    [config mapKeyPath:@"testModel" withConfig:[ESObjectsConstructorConfig objectWithMapping:foreignConfig]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    assertThat(error, notNilValue());
+    assertThat(model, nilValue());
+}
+
+- (void)testOptionalJSONFields {
+    NSDictionary *json = @{@"stringField": @"test", @"dateField" : [NSNull null]};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:@[@"stringField", @"numberField?", @"doubleField?", @"dateField?"]];
     
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
     
     assertThat(error, nilValue());
     [self testFields:@{@"stringField": @"test"} inModel:model];
+    
+    assertThat(model.dateField, nilValue());
+    assertThat(model.invocations, containsInAnyOrder(@"stringField=test", @"dateField=(null)", nil));
+}
+
+- (void)testOptionalJSONFieldWithInvalidValue {
+    NSDictionary *json = @{@"doubleField": @"test"};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:@[@"doubleField?"]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    
+    assertThat(model, nilValue());
+    assertThat(error, notNilValue());
 }
 
 - (void)testNestedConfigs {
@@ -290,9 +389,7 @@
     NSError *error = nil;
     TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
     assertThat(error, nilValue());
-    [self testFields:@{@"stringField": @"test-test",
-                       @"numberField" : @2.4535,
-                       @"doubleField" : @3.145142342} inModel:model];
+    assertThat(model.invocations, containsInAnyOrder(@"stringField=test-test", @"numberField=2.4535", @"doubleField=3.145142342", nil));
 }
 
 #pragma mark -

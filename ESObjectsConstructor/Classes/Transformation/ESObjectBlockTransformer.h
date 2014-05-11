@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "ESObjectValueTransformerProtocol.h"
 
-typedef id (^ESObjectBlockTransformerBlock)(id value, Class destinationClass);
+typedef id (^ESObjectBlockTransformerBlock)(id value, Class destinationClass, NSError **error);
 
 @interface ESObjectBlockTransformer : NSObject <ESObjectValueTransformerProtocol>
 

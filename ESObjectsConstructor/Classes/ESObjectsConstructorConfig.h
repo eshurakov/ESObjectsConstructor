@@ -12,16 +12,16 @@ typedef NS_ENUM(NSUInteger, ESObjectsConstructorConfigType) {
     ESObjectsConstructorConfigCollection
 };
 
-@class ESObjectMapping;
+@protocol ESObjectMappingProtocol;
 
 @interface ESObjectsConstructorConfig : NSObject
 
 @property(nonatomic, assign, readonly) ESObjectsConstructorConfigType type;
-@property(nonatomic, strong, readonly) ESObjectMapping *objectMapping;
+@property(nonatomic, strong, readonly) id <ESObjectMappingProtocol> objectMapping;
 @property(nonatomic, strong, readonly) ESObjectsConstructorConfig *config;
 
-+ (instancetype)objectWithMapping:(ESObjectMapping *)objectMapping;
-+ (instancetype)collectionWithObjectMapping:(ESObjectMapping *)objectMapping;
-+ (instancetype)collectionOfCollectionsWithObjectMapping:(ESObjectMapping *)objectMapping;
++ (instancetype)objectWithMapping:(id <ESObjectMappingProtocol>)objectMapping;
++ (instancetype)collectionWithObjectMapping:(id <ESObjectMappingProtocol>)objectMapping;
++ (instancetype)collectionOfCollectionsWithObjectMapping:(id <ESObjectMappingProtocol>)objectMapping;
 
 @end

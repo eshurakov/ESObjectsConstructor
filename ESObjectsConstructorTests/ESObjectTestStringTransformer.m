@@ -9,16 +9,16 @@
 
 @implementation ESObjectTestStringTransformer
 
-- (id)trasformValue:(id)value toClass:(Class)class {
-    if (![class isEqual:[NSString class]]) {
-        return nil;
+- (id)trasformValue:(id)value toClass:(Class)class error:(NSError *__autoreleasing *)error {
+    if ([class isEqual:[NSString class]] && [value isKindOfClass:class]) {
+        return [value stringByAppendingString:@"-test"];
     }
     
-    if (![value isKindOfClass:class]) {
-        return nil;
+    if (error) {
+        *error = [NSError errorWithDomain:@"" code:0 userInfo:@{NSLocalizedDescriptionKey : @"invalid data"}];
     }
     
-    return [value stringByAppendingString:@"-test"];
+    return nil;
 }
 
 @end

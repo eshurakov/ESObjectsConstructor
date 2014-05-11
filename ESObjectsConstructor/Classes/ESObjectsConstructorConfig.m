@@ -10,13 +10,13 @@
 
 @interface ESObjectsConstructorConfig ()
 @property(nonatomic, assign, readwrite) ESObjectsConstructorConfigType type;
-@property(nonatomic, strong, readwrite) ESObjectMapping *objectMapping;
+@property(nonatomic, strong, readwrite) id <ESObjectMappingProtocol> objectMapping;
 @property(nonatomic, strong, readwrite) ESObjectsConstructorConfig *config;
 @end
 
 @implementation ESObjectsConstructorConfig
 
-+ (instancetype)objectWithMapping:(ESObjectMapping *)objectMapping {
++ (instancetype)objectWithMapping:(id <ESObjectMappingProtocol>)objectMapping {
     NSParameterAssert(objectMapping);
     
     ESObjectsConstructorConfig *config = [[[self class] alloc] init];
@@ -25,7 +25,7 @@
     return config;
 }
 
-+ (instancetype)collectionWithObjectMapping:(ESObjectMapping *)objectMapping {
++ (instancetype)collectionWithObjectMapping:(id <ESObjectMappingProtocol>)objectMapping {
     NSParameterAssert(objectMapping);
     
     ESObjectsConstructorConfig *config = [[[self class] alloc] init];
@@ -34,7 +34,7 @@
     return config;
 }
 
-+ (instancetype)collectionOfCollectionsWithObjectMapping:(ESObjectMapping *)objectMapping {
++ (instancetype)collectionOfCollectionsWithObjectMapping:(id <ESObjectMappingProtocol>)objectMapping {
     NSParameterAssert(objectMapping);
     
     ESObjectsConstructorConfig *config = [[[self class] alloc] init];

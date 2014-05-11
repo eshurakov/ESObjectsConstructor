@@ -13,5 +13,6 @@
 @property(nonatomic, strong) NSNumber *age;
 @property(nonatomic, strong) NSDecimalNumber *balance;
 @property(nonatomic, assign) double score;
+@property(nonatomic, assign) BOOL verified;
 
 @end

@@ -12,14 +12,20 @@
     NSNumberFormatter *_numberFormatter;
 }
 
-- (id)trasformValue:(id)value toClass:(Class)class {
+- (id)trasformValue:(id)value toClass:(Class)class error:(NSError *__autoreleasing *)error {
+    if ([value isKindOfClass:[NSNull class]]) {
+        return nil;
+    }
+    
     if (!class || [value isKindOfClass:class]) {
         return value;
     }
     
+    id result = nil;
+    
     if ([class isEqual:[NSString class]]) {
         if ([value respondsToSelector:@selector(stringValue)]) {
-            return [value stringValue];
+            result = [value stringValue];
         }
     } else if ([class isEqual:[NSNumber class]] && [value isKindOfClass:[NSString class]]) {
         if (_numberFormatter == nil) {
@@ -28,20 +34,25 @@
             [_numberFormatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
         }
         
-        return [_numberFormatter numberFromString:value];
+        result = [_numberFormatter numberFromString:value];
         
     } else if ([class isEqual:[NSDecimalNumber class]] && [value isKindOfClass:[NSString class]]) {
-        NSDecimalNumber *result = [NSDecimalNumber decimalNumberWithString:value];
+        result = [NSDecimalNumber decimalNumberWithString:value];
         if ([result isEqual:[NSDecimalNumber notANumber]]) {
             result = nil;
         }
-        return result;
         
     } else if ([class isEqual:[NSDate class]] && [value isKindOfClass:[NSNumber class]]) {
-        return [NSDate dateWithTimeIntervalSince1970:([value longLongValue] / 1000.0)];
+        result = [NSDate dateWithTimeIntervalSince1970:([value longLongValue] / 1000.0)];
     }
     
-    return nil;
+    if (!result && error) {
+        *error = [NSError errorWithDomain:@""
+                                     code:0
+                                 userInfo:@{NSLocalizedDescriptionKey : @"can't convert value"}];
+    }
+    
+    return result;
 }
 
 @end

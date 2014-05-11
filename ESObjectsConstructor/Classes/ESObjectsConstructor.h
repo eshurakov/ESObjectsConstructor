@@ -9,20 +9,14 @@
 
 extern NSString * const ESObjectsConstructorErrorDomain;
 typedef NS_ENUM(NSUInteger, ESObjectsConstructorErrorCode) {
-    ESObjectsConstructorMultipleIssues = 1,
-    ESObjectsConstructorInvalidData,
+    ESObjectsConstructorInvalidData = 1,
     ESObjectsConstructorNilModel,
-    ESObjectsConstructorUnknownProperty,
-    ESObjectsConstructorMissingValue
+    ESObjectsConstructorUnknownProperty
 };
 
 @class ESObjectsConstructorConfig;
-@protocol ESObjectValueTransformerProtocol;
 
 @interface ESObjectsConstructor : NSObject
-
-@property(nonatomic, strong) id <ESObjectValueTransformerProtocol> valueTransformer;
-@property(nonatomic, strong) id <ESObjectValueTransformerProtocol> valueSerializer;
 
 - (id)mapData:(id)data withConfig:(ESObjectsConstructorConfig *)config error:(NSError **)error;
 - (id)serializeObject:(id)object withConfig:(ESObjectsConstructorConfig *)config error:(NSError **)error;

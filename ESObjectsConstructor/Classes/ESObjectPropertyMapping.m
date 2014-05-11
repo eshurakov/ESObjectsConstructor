@@ -18,7 +18,7 @@
     self = [super init];
     if (self) {
         [self parseSourceKeyPath:keyPath];
-        _destinationKeyPath = _sourceKeyPath;
+        _destinationKey = _sourceKeyPath;
     }
     return self;
 }

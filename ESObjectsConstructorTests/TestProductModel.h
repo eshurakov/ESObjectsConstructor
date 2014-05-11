@@ -9,6 +9,8 @@
 
 @interface TestProductModel : NSObject
 
+@property(nonatomic, strong, readonly) NSMutableArray *invocations;
+
 @property(nonatomic, strong) NSString *stringField;
 @property(nonatomic, strong) NSNumber *numberField;
 @property(nonatomic, strong) NSDecimalNumber *decimalField;
@@ -16,5 +18,7 @@
 @property(nonatomic, strong) TestProductModel *testModel;
 @property(nonatomic, strong) NSDate *dateField;
 @property(nonatomic, assign) BOOL boolField;
+
+@property(nonatomic, strong) id idField;
 
 @end

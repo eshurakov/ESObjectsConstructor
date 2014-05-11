@@ -6,6 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ESObjectMappingProtocol.h"
 
 @class ESObjectsConstructorConfig;
 @class ESObjectPropertyMapping;
@@ -13,10 +14,9 @@
 
 @protocol ESObjectValueTransformerProtocol;
 
-@interface ESObjectMapping : NSObject
+@interface ESObjectMapping : NSObject <ESObjectMappingProtocol>
 
 @property(nonatomic, strong, readonly) Class modelClass;
-@property(nonatomic, copy, readonly) NSArray *mappings;
 
 - (instancetype)initWithModelClass:(Class)modelClass;
 
@@ -26,11 +26,7 @@
 - (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath withConfig:(ESObjectsConstructorConfig *)config;
 - (ESObjectPropertyMapping *)mapKeyPath:(NSString *)sourceKeyPath withValueTransformer:(id <ESObjectValueTransformerProtocol>)valueTransformer;
 
-#pragma mark -
-
-- (id)newResultObject;
-- (BOOL)canMapObjectOfClass:(Class)objectClass;
-
-- (void)enumerateMappingsWithBlock:(void (^)(ESObjectPropertyMapping *mapping, ESObjectProperty *property, BOOL *stop))block;
+- (ESObjectProperty *)propertyForMapping:(ESObjectPropertyMapping *)mapping;
+- (ESObjectPropertyMapping *)propertyMappingForKeyPath:(NSString *)keyPath;
 
 @end
