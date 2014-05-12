@@ -1,5 +1,10 @@
 #### Strict framework for mapping between NSDictionary and strongly typed objects
 
+Cocoapods
+```
+pod 'ESObjectsConstructor', '~> 1.0.0'
+```
+
 Let's say we have User and Address models, represented by the following interfaces:
 
 ```objc
