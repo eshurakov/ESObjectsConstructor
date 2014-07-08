@@ -18,7 +18,18 @@ typedef NS_ENUM(NSUInteger, ESObjectsConstructorErrorCode) {
 
 @interface ESObjectsConstructor : NSObject
 
+@property(nonatomic, strong) dispatch_queue_t workQueue;
+@property(nonatomic, strong) dispatch_queue_t callbackQueue;
+
 - (id)mapData:(id)data withConfig:(ESObjectsConstructorConfig *)config error:(NSError **)error;
 - (id)serializeObject:(id)object withConfig:(ESObjectsConstructorConfig *)config error:(NSError **)error;
+
+- (void)mapData:(id)data
+     withConfig:(ESObjectsConstructorConfig *)config
+     completion:(void (^)(id mappedObject, NSError *error))completion;
+
+- (void)serializeObject:(id)object
+             withConfig:(ESObjectsConstructorConfig *)config
+             completion:(void (^)(id serializedObject, NSError *error))completion;
 
 @end

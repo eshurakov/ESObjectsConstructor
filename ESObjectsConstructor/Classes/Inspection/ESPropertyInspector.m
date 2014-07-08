@@ -37,27 +37,36 @@ static NSMutableDictionary *propertyInspectorChainCache = nil;
 }
 
 + (NSArray *)propertiesForClass:(Class)class includeSuperclasses:(BOOL)includeSuperclasses {
+    static dispatch_queue_t privateQueue = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        privateQueue = dispatch_queue_create("ESPropertyInspector", DISPATCH_QUEUE_SERIAL);
+    });
+    
     if (!class) {
         return nil;
     }
     
-    NSArray *properties = nil;
-    if (includeSuperclasses) {
-        properties = propertyInspectorChainCache[(id)class];
-    } else {
-        properties = propertyInspectorSingleClassCache[(id)class];
-    }
+    __block NSArray *properties = nil;
     
-    if (!properties) {
-        properties = [self _propertiesForClass:class includeSuperclasses:includeSuperclasses];
-        if (properties) {
-            if (includeSuperclasses) {
-                propertyInspectorChainCache[(id)class] = properties;
-            } else {
-                propertyInspectorSingleClassCache[(id)class] = properties;
+    dispatch_sync(privateQueue, ^{
+        if (includeSuperclasses) {
+            properties = propertyInspectorChainCache[(id)class];
+        } else {
+            properties = propertyInspectorSingleClassCache[(id)class];
+        }
+        
+        if (!properties) {
+            properties = [self _propertiesForClass:class includeSuperclasses:includeSuperclasses];
+            if (properties) {
+                if (includeSuperclasses) {
+                    propertyInspectorChainCache[(id)class] = properties;
+                } else {
+                    propertyInspectorSingleClassCache[(id)class] = properties;
+                }
             }
         }
-    }
+    });
     
     return properties;
 }
