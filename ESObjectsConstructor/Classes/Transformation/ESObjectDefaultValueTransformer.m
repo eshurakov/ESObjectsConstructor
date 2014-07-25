@@ -17,11 +17,15 @@
         return nil;
     }
     
-    if (!class || [value isKindOfClass:class]) {
+    if ([value isKindOfClass:class]) {
         return value;
     }
     
     id result = nil;
+    
+    if (!class) {
+        result = value;
+    }
     
     if ([class isEqual:[NSString class]]) {
         if ([value respondsToSelector:@selector(stringValue)]) {

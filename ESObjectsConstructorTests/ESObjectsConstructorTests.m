@@ -68,6 +68,21 @@
     assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
 }
 
+- (void)testFailMissingGenericClassFieldInJSON {
+    NSDictionary *json = @{};
+    
+    ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
+    [config mapProperties:@[@"idField"]];
+    
+    NSError *error = nil;
+    TestProductModel *model = [_objectsConstructor mapData:json withConfig:[ESObjectsConstructorConfig objectWithMapping:config] error:&error];
+    
+    assertThat(model, nilValue());
+    
+    assertThat(error.domain, equalTo(ESObjectsConstructorErrorDomain));
+    assertThatInteger(error.code, equalToInteger(ESObjectsConstructorInvalidData));
+}
+
 - (void)testFailInvalidData {
     ESObjectMapping *config = [[ESObjectMapping alloc] initWithModelClass:[TestProductModel class]];
     
