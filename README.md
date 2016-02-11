@@ -1,6 +1,6 @@
 #### Strict framework for mapping between NSDictionary and strongly typed objects
 
-Cocoapods
+CocoaPods
 ```
 pod 'ESObjectsConstructor', '~> 1.0.0'
 ```
